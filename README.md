@@ -1,4 +1,18 @@
-# useRefCallback Hook
+# `useRefCallback` Hook
+
+React's `useRefCallback` hook bridges the gap between referencing DOM nodes and handling their associated side-effects, especially when the nodes dynamically attach or detach.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Installation](#installation)
+- [Concept](#concept)
+  * [Modes](#modes)
+- [Usage](#usage)
+  * [SingleNode Example: Dynamic Positioning Based on Reference Element](#singlenode-example-dynamic-positioning-based-on-reference-element)
+  * [MultiNode Example: Dynamic Video Observer](#multinode-example-dynamic-video-observer)
+- [Practical Example: `ToolTip` Component](#practical-example-tooltip-component)
+- [Conclusion](#conclusion)
 
 ## Overview
 
@@ -10,29 +24,28 @@ This hook operates in two modes: `SingleNode` and `MultiNode`, catering to a var
 
 ## Installation
 
-To begin using the `useRefCallback` hook, first ensure you have the necessary dependencies installed:
+First, make sure you've installed the necessary dependencies:
 
 ```bash
 npm install react
 ```
 
-Then, clone or download this repository.
+Next, clone or download this repository.
 
 ## Concept
 
-When a component needs to interact with a DOM element, the traditional method involves attaching a `ref` to it. This `ref` might also need side effects when the node gets attached or detached. The `useRefCallback` eases this by combining the process of attaching a ref and handling the side-effects in a streamlined manner.
+Traditional React development involves using a `ref` to interact with a DOM element. When this ref is used with side-effects that need to trigger upon the node's attachment or detachment, the process can get convoluted. The `useRefCallback` offers a seamless way to merge these operations.
 
 ### Modes
 
-1. **SingleNode**: This is the default mode tailored for a singular node. When the node gets detached, its associated cleanup (if any) is run.
+1. **SingleNode**: This is the standard mode designed for a single node. Upon detachment, its corresponding cleanup (if defined) executes.
+2. **MultiNode**: Tailored for scenarios where you might use the ref callback with various nodes dynamically. Each node should come with a unique ID to manage its specific cleanup functions.
 
-2. **MultiNode**: Intended for scenarios where the ref callback might be used with multiple nodes dynamically. Each node should be passed with its unique ID to manage the associated cleanup functions.
-
-## Basic Usage
+## Usage
 
 ### SingleNode Example: Dynamic Positioning Based on Reference Element
 
-Imagine you have a layout component that positions children in a circle around a reference element. The exact position depends on the size of the reference element.
+This example demonstrates how to use `useRefCallback` to position children elements dynamically around a reference element based on its size.
 
 **CircleLayoutProvider.tsx**:
 
@@ -118,7 +131,7 @@ In this example, each child is dynamically positioned in a circular arrangement 
 
 ### MultiNode Example: Dynamic Video Observer
 
-Using the `useDynamicVideos` hook, you can observe multiple video elements on a page. The hook will play a video when it's fully in view and pause it when it's not.
+Observe multiple video elements on a page. Videos play when fully in view and pause otherwise.
 
 ```tsx
 // ... (imports)
@@ -153,6 +166,51 @@ return (
 );
 ```
 
+## Practical Example: `ToolTip` Component
+
+A versatile `ToolTip` that can be used almost anywhere. The component handles all it's events based on the parent without ever needing to pass down props.
+
+import { useRef, HTMLAttributes } from 'react';
+import { motion, useAnimation } from 'framer-motion';
+import useViewportSize from '../../features/viewportSize/hook/useViewportSize';
+import { useRefCallback } from '../../hooks/useRefCallback/useRefCallback';
+
+export default function ToolTip({ children, className, ...rest }: ToolTipProps) {
+  const controls = useAnimation();
+  const { desktop } = useViewportSize();
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const attachedElements = useRef(new Set<HTMLElement>());
+
+  const containerRef = useRefCallback((node) => {
+    const hoverElement = node.parentElement;
+    if (desktop) {
+      hoverElement?.addEventListener('mouseenter', () => controls.start());
+      hoverElement?.addEventListener('mouseleave', () => controls.stop());
+    } else {
+      hoverElement?.addEventListener('click', () => controls.toggle());
+    }
+
+    return () => {
+      hoverElement?.removeEventListener('mouseenter', () => controls.start());
+      hoverElement?.removeEventListener('mouseleave', () => controls.stop());
+      hoverElement?.removeEventListener('click', () => controls.toggle());
+    };
+  }, [controls, desktop]);
+
+  return (
+    <figcaption className={`tooltipContainer ${className ?? ''}`} ref={containerRef} {...rest}>
+      <motion.div ref={tooltipRef} animate={controls}>
+        {children}
+      </motion.div>
+    </figcaption>
+  );
+}
+
+type ToolTipProps = {
+  children: React.ReactNode;
+} & HTMLAttributes<HTMLDivElement>;
+
+
 ## Conclusion
 
-The `useRefCallback` hook offers a cleaner, more modular approach to managing DOM nodes and their associated side-effects. Whether you're dealing with a single node or dynamically working with multiple nodes, this hook can simplify your codebase and enhance performance.
+The `useRefCallback` hook offers a more streamlined and modular approach to managing DOM nodes and their associated side-effects in React. Whether dealing with a single node or dynamically handling multiple ones, this hook can help simplify your codebase and boost performance by eliminating the need for re-renders.
