@@ -170,6 +170,7 @@ return (
 
 A versatile `ToolTip` that can be used almost anywhere. The component handles all it's events based on the parent without ever needing to pass down props.
 
+```tsx
 import { useRef, HTMLAttributes } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import useViewportSize from '../../features/viewportSize/hook/useViewportSize';
@@ -209,7 +210,7 @@ export default function ToolTip({ children, className, ...rest }: ToolTipProps) 
 type ToolTipProps = {
   children: React.ReactNode;
 } & HTMLAttributes<HTMLDivElement>;
-
+```
 
 ## Conclusion
 
