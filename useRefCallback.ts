@@ -8,7 +8,7 @@ import {
   RefCallbackEffect,
   SingleNode,
   SingleNodeRefCallback,
-} from './utils/types';
+} from './types';
 
 /**
  * Provides a ref callback function for DOM elements, facilitating the
