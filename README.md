@@ -168,7 +168,7 @@ return (
 
 ## Practical Example: `ToolTip` Component
 
-A versatile `ToolTip` that can be used almost anywhere. The component handles all it's events based on the parent without ever needing to pass down props.
+A versatile `ToolTip` that can be used almost anywhere. The component handles all it's events based on the parent without ever needing to pass down props. (see it action [here](https://ryannono.com))
 
 ```tsx
 import { useRef, HTMLAttributes } from 'react';
